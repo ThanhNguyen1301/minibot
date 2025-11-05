@@ -119,7 +119,7 @@ def generate_launch_description():
             '/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
                     #joint and tf of gazebo
             '/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model',
-            '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V', 
+            # '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V', 
 
             # Lidar 
             '/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
@@ -185,6 +185,7 @@ def generate_launch_description():
         parameters=[
             twist_mux_params_file,
             {'use_stamped': True},
+            # {'use_stamped': False},
         ],
         remappings=[
             ('cmd_vel_out', 
