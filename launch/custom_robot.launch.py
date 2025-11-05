@@ -3,7 +3,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, GroupAction, RegisterEventHandler, DeclareLaunchArgument
+from launch.actions import RegisterEventHandler, DeclareLaunchArgument, IncludeLaunchDescription
 from launch.event_handlers import OnProcessStart
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
@@ -15,15 +15,13 @@ def generate_launch_description():
     package_name= 'minibot'
     package_dir= get_package_share_directory(package_name) 
 
-    # Add launch configurations
     use_sim_time = LaunchConfiguration('use_sim_time')
     use_ros2_control = LaunchConfiguration('use_ros2_control')
-    use_ros2_control_gz_sim = LaunchConfiguration('use_ros2_control_gz_sim')
+    lidar_serial_port = LaunchConfiguration('lidar_serial_port')
 
-    # Declare launch arguments
     declare_use_sim_time= DeclareLaunchArgument(
         'use_sim_time',
-        default_value='true',
+        default_value='false',
         description='If true, use simulated clock'
     )
     
@@ -33,10 +31,10 @@ def generate_launch_description():
         description='If true, use ros2_control'
     )
 
-    declare_use_ros2_control_gz_sim = DeclareLaunchArgument(
-        'use_ros2_control_gz_sim',
-        default_value='true',
-        description='If true, use ros2_control in gz_sim'
+    declare_lidar_serial_port = DeclareLaunchArgument(
+        'lidar_serial_port',
+        default_value='/dev/ttyUSB1',
+        description='Specifying usb port to connected lidar'
     )
 
     # Declare the path to files
@@ -46,30 +44,18 @@ def generate_launch_description():
         'robot.urdf.xacro'
     )
 
-    world_file_path = os.path.join(
-        package_dir, 
-        'worlds', 
-        'empty.sdf',
-        # 'playground.sdf'
-    )
-
-    rviz_config_file = os.path.join(
+    rviz_config_file_dir = os.path.join(
         package_dir, 
         'config', 
-        'sim_config.rviz'
+        'minibot_config.rviz'
     )
 
-    robot_controllers_file = os.path.join(
+    robot_controllers_file_dir = os.path.join(
         package_dir, 
         'config', 
-        'controller_gz_sim.yaml'
+        'controller.yaml'
     )
 
-    gazebo_params_file = os.path.join(
-        package_dir, 
-        'config', 
-        'gz_params.yaml'
-    )
     
     twist_mux_params_file = os.path.join(
         package_dir, 
@@ -82,14 +68,13 @@ def generate_launch_description():
         'xacro ', 
         robot_description_xacro_file, 
         ' use_ros2_control:=', 
-        use_ros2_control,
-        ' use_ros2_control_gz_sim:=',
-        use_ros2_control_gz_sim,        
+        use_ros2_control
         ])
     
     params = {
         'robot_description': ParameterValue(robot_description_config, value_type=str), 
-        'use_sim_time': use_sim_time,        
+        'use_sim_time': use_sim_time,
+        'use_ros2_control': use_ros2_control
     }
 
     # robot_state_publisher node
@@ -98,69 +83,19 @@ def generate_launch_description():
         executable='robot_state_publisher',
         output='screen',
         parameters=[params]
-    )
-    
-    # gz_bridge node
-    # format: '<topic_name>@/[/]<ros2_topic_type_name>@/[/]<gazebo_topic_type_name>',
-    # ros2 topic type <topic_name> to check topi type_name in ros2
-    # gz topic -t <topic_name> -i to check topic type_name in gazebo
-    node_gz_bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        arguments=[
-            
-            # General
-            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
-
-            # Gazebo_Control
-            '/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
-            '/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
-            '/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model',
-            '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V', 
-
-            # Lidar 
-            '/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
-            '/scan/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
-
-        ],
-        output='screen'
+        
     )
 
-
-    # gz launch world
-    gazebo = IncludeLaunchDescription(
-                PythonLaunchDescriptionSource([os.path.join(
-                    get_package_share_directory('ros_gz_sim'),
-                    'launch',
-                    'gz_sim.launch.py'
-                )]), 
-                launch_arguments=
-                {'gz_args': f'-r -v 4 {world_file_path}',
-                 'extra_gazebo_args': '--ros-args --params-file' + gazebo_params_file}.items()
+ 
+    # controller spawn
+    node_ros2_control = Node(
+        package="controller_manager",
+        executable="ros2_control_node",
+        parameters=[params, 
+                    robot_controllers_file_dir
+                    ],
     )
 
-    # gz spawn robot entity 
-    node_gz_spawn_entity = Node(
-        package='ros_gz_sim',
-        executable='create',
-        output='screen',
-        arguments=['-topic', 'robot_description', 
-                '-name', 'minibot',
-                '-allow_renaming', 'true',
-                '-z', '0.1'],
-    )
-
-    # rviz2 node
-    node_rviz2 = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        arguments=['-d', rviz_config_file],
-        parameters=[{'use_sim_time': True}],
-        output='both'
-    )
-
-    # controller spawn 
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
@@ -172,7 +107,7 @@ def generate_launch_description():
         executable="spawner",
         arguments=["diff_drive_controller", 
                    "--param-file", 
-                   robot_controllers_file
+                   robot_controllers_file_dir
         ],
     )
 
@@ -183,7 +118,8 @@ def generate_launch_description():
         output='screen',
         parameters=[
             twist_mux_params_file,
-            {'use_stamped': True},
+            # {'use_stamped': True},
+            {'use_stamped': False},
         ],
         remappings=[
             ('cmd_vel_out', 
@@ -202,26 +138,38 @@ def generate_launch_description():
         ],
     )
 
+    register_node_ros2_control = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action= node_robot_state_publisher,
+            on_start= [node_ros2_control],
+        )
+    )
+
     register_joint_state_broadcaster_spawner = RegisterEventHandler(
         event_handler=OnProcessStart(
-            target_action= node_gz_spawn_entity,
-            on_start= [joint_state_broadcaster_spawner],
+            target_action= node_ros2_control,
+            on_start=[joint_state_broadcaster_spawner],
         )
     )
 
     register_diff_drive_controller_spawner = RegisterEventHandler(
         event_handler=OnProcessStart(
             target_action= joint_state_broadcaster_spawner,
-            on_start= [diff_drive_controller_spawner],
+            on_start=[diff_drive_controller_spawner],
         )
     )
 
-    group_spawn_gz= GroupAction(
-        [gazebo, 
-         node_gz_spawn_entity,
-        ]
+    node_rplidar_drive = IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([os.path.join(
+                    get_package_share_directory('rplidar_ros'),
+                    'launch',
+                    'rplidar_c1_launch.py'
+                )]), 
+                launch_arguments={
+                    'serial_port': lidar_serial_port, 
+                    'frame_id': 'lidar_frame'
+                    }.items()
     )
-
 
     # Create the launch description and populate
     ld = LaunchDescription()
@@ -229,18 +177,20 @@ def generate_launch_description():
     # Add the nodes to the launch description
     ld.add_action(declare_use_sim_time)
     ld.add_action(declare_use_ros2_control)
-    ld.add_action(declare_use_ros2_control_gz_sim)
+    ld.add_action(declare_lidar_serial_port)
 
+    ld.add_action(register_node_ros2_control)
     ld.add_action(register_joint_state_broadcaster_spawner)
     ld.add_action(register_diff_drive_controller_spawner)
 
     ld.add_action(node_robot_state_publisher)
     ld.add_action(node_twist_mux)
     ld.add_action(node_twist_stamper)
-    ld.add_action(node_gz_bridge)
 
-    ld.add_action(group_spawn_gz)
-    ld.add_action(node_rviz2)
+    ld.add_action(node_rplidar_drive)
+
+
+
 
     # Generate the launch description  
     return ld

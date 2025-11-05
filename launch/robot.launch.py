@@ -53,7 +53,7 @@ def generate_launch_description():
 
     declare_lidar_serial_port = DeclareLaunchArgument(
         'lidar_serial_port',
-        default_value='/dev/ttyUSB0',
+        default_value='/dev/ttyUSB1',
         description='Specifying usb port to connected lidar'
     )
 
@@ -195,6 +195,8 @@ def generate_launch_description():
                     get_package_share_directory('rplidar_ros'),
                     'launch',
                     'rplidar_c1_launch.py'
+                    # 'view_rplidar_c1_launch.py'
+
                 )]), 
                 launch_arguments={
                     'serial_port': lidar_serial_port, 
@@ -217,13 +219,12 @@ def generate_launch_description():
     ld.add_action(node_robot_state_publisher)
     ld.add_action(node_twist_mux)
     ld.add_action(node_twist_stamper)
+    ld.add_action(node_rplidar_drive)
 
     # ===================== CAMERA SECTION  =====================
 
     # for node_republisher in node_image_republishers:
     #     ld.add_action(node_republisher)
-    # ld.add_action(node_rplidar_drive)
-
     # ===================== END CAMERA SECTION =====================
 
 
