@@ -27,6 +27,7 @@ teleop_node:
     use_sim_time: true
     inverted_reverse: true
     
-    publish_stamped_twist: true
+    # publish_stamped_twist: true
+    publish_stamped_twist: false
     frame: teleop_twist_joy
     
