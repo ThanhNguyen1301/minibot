@@ -118,8 +118,8 @@ def generate_launch_description():
             '/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
             '/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
                     #joint and tf of gazebo
-            '/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model',
             # '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V', 
+            '/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model',
 
             # Lidar 
             '/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
@@ -184,8 +184,8 @@ def generate_launch_description():
         output='screen',
         parameters=[
             twist_mux_params_file,
-            {'use_stamped': True},
-            # {'use_stamped': False},
+            # {'use_stamped': True},
+            {'use_stamped': False},
         ],
         remappings=[
             ('cmd_vel_out', 
