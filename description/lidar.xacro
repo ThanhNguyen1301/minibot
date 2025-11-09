@@ -7,17 +7,17 @@
     <xacro:property name="lidar_offset_z"           value="0.12"/>
 
     <!-- Lidar -->
-    <!-- <joint name="lidar_joint" type="fixed">
+    <joint name="lidar_joint" type="fixed">
         <parent link="chasis"/>
         <child link="lidar_frame"/>
         <origin xyz="${lidar_offset_x} 0.0 ${lidar_offset_z}" rpy="0 0 ${pi}"/>      
-    </joint> -->
+    </joint>
 
-    <joint name="lidar_joint" type="fixed">
+    <!-- <joint name="lidar_joint" type="fixed">
         <parent link="base_link"/>
         <child link="lidar_frame"/>
         <origin xyz="0.133 0.0 0.105" rpy="0 0 ${pi}"/>      
-    </joint>
+    </joint> -->
 
     <link name="lidar_frame">
         <visual>
