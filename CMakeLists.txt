@@ -35,7 +35,7 @@ install(TARGETS
 )
 
 install(
-  DIRECTORY config description launch worlds demo_publisher_node maps visual_demos
+  DIRECTORY config description launch worlds demo_publisher_node maps
   DESTINATION share/${PROJECT_NAME}
 )
 
