@@ -10,26 +10,6 @@ from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from launch.substitutions import LaunchConfiguration, Command
 
-
-# Image Transport Republishers
-# terminal command example: ros2 run image_transport republish raw compressed --ros-args -r in:=/camera/image_raw -r out/compressed:=/camera/image_raw/compressed
-
-# ===================== CAMERA SECTION =====================
-# def image_transport_republisher(transport, camera_topics):
-#     base_topic = camera_topics.split('/')[-1]
-    
-#     return Node(
-#         package='image_transport',
-#         executable='republish',
-#         name=f'image_transport_republish_{transport}_{base_topic}',
-#         arguments=['raw', transport],
-#         remappings=[
-#             ('in', f'/camera/{camera_topics}'),
-#             (f'out/{transport}', f'/camera/{camera_topics}/{transport}'),
-#         ],
-#     )
-# ===================== END CAMERA SECTION =================
-
 def generate_launch_description():
 
     package_name= 'minibot'
@@ -105,17 +85,6 @@ def generate_launch_description():
         parameters=[params]
         
     )
-
-    # ===================== CAMERA SECTION =====================
-
-    # Image Transport Republishers Node
-    # camera = 'image_raw'
-    # depth_camera = 'depth/image_raw'
-    # image_transports = ['compressed','compressedDepth', 'theora', 'zstd' ]  
-    # node_image_republishers = [image_transport_republisher(transport, depth_camera) 
-    #                       for transport in image_transports]
-    
-    # ===================== END CAMERA SECTION ==================
 
  
     # controller spawn
@@ -195,8 +164,6 @@ def generate_launch_description():
                     get_package_share_directory('rplidar_ros'),
                     'launch',
                     'rplidar_c1_launch.py'
-                    # 'view_rplidar_c1_launch.py'
-
                 )]), 
                 launch_arguments={
                     'serial_port': lidar_serial_port, 
@@ -219,13 +186,10 @@ def generate_launch_description():
     ld.add_action(node_robot_state_publisher)
     ld.add_action(node_twist_mux)
     ld.add_action(node_twist_stamper)
+
     ld.add_action(node_rplidar_drive)
 
-    # ===================== CAMERA SECTION  =====================
 
-    # for node_republisher in node_image_republishers:
-    #     ld.add_action(node_republisher)
-    # ===================== END CAMERA SECTION =====================
 
 
     # Generate the launch description  

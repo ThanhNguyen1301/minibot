@@ -11,22 +11,6 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch.substitutions import LaunchConfiguration, Command
 
 
-# Image Transport Republishers
-# terminal command example: ros2 run image_transport republish raw compressed --ros-args -r in:=/camera/image_raw -r out/compressed:=/camera/image_raw/compressed
-# def image_transport_republisher(transport, camera_topics):
-#     base_topic = camera_topics.split('/')[-1]
-    
-#     return Node(
-#         package='image_transport',
-#         executable='republish',
-#         name=f'image_transport_republish_{transport}_{base_topic}',
-#         arguments=['raw', transport],
-#         remappings=[
-#             ('in', f'/camera/{camera_topics}'),
-#             (f'out/{transport}', f'/camera/{camera_topics}/{transport}'),
-#         ],
-#     )
-
 def generate_launch_description():
 
     package_name= 'minibot'
@@ -40,19 +24,19 @@ def generate_launch_description():
     # Declare launch arguments
     declare_use_sim_time= DeclareLaunchArgument(
         'use_sim_time',
-        default_value='true',
+        default_value='True',
         description='If true, use simulated clock'
     )
     
     declare_use_ros2_control = DeclareLaunchArgument(
         'use_ros2_control',
-        default_value='true',
+        default_value='True',
         description='If true, use ros2_control'
     )
 
     declare_use_ros2_control_gz_sim = DeclareLaunchArgument(
         'use_ros2_control_gz_sim',
-        default_value='true',
+        default_value='True',
         description='If true, use ros2_control in gz_sim'
     )
 
@@ -66,15 +50,14 @@ def generate_launch_description():
     world_file_path = os.path.join(
         package_dir, 
         'worlds', 
+        # 'empty.sdf',
         'custom.sdf'
-        # 'empty.sdf'
-        # 'playground.sdf'
     )
 
     rviz_config_file = os.path.join(
         package_dir, 
         'config', 
-        'sim_config.rviz'
+        '.rviz'
     )
 
     robot_controllers_file = os.path.join(
@@ -134,34 +117,15 @@ def generate_launch_description():
             '/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
             '/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
                     #joint and tf of gazebo
-            '/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model',
             '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V', 
+            '/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model',
 
             # Lidar 
             '/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
             '/scan/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
-
-            # Camera
-            # '/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image',
-            # '/camera/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
-
-            # RGBD Camera
-            # '/camera/depth/image_raw/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
-            # '/camera/depth/image_raw/depth_image@sensor_msgs/msg/Image[gz.msgs.Image',
-            # '/camera/depth/image_raw/image@sensor_msgs/msg/Image[gz.msgs.Image',
-            # '/camera/depth/image_raw/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
         ],
         output='screen'
     )
-
-# ===================== CAMERA SECTION =====================
-    # Image Transport Republishers Node
-    # camera = 'image_raw'
-    # depth_camera = 'depth/image_raw'
-    # image_transports = ['compressed','compressedDepth', 'theora', 'zstd' ]  
-    # node_image_republishers = [image_transport_republisher(transport, depth_camera) 
-    #                       for transport in image_transports]
-# ===================== CAMERA SECTION =====================
 
     # gz launch world
     gazebo = IncludeLaunchDescription(
@@ -219,7 +183,8 @@ def generate_launch_description():
         output='screen',
         parameters=[
             twist_mux_params_file,
-            {'use_stamped': True},
+            # {'use_stamped': True},
+            {'use_stamped': False},
         ],
         remappings=[
             ('cmd_vel_out', 
@@ -274,12 +239,8 @@ def generate_launch_description():
     ld.add_action(node_twist_mux)
     ld.add_action(node_twist_stamper)
     ld.add_action(node_gz_bridge)
-    # ===================== CAMERA SECTION =====================
-    # for node_republisher in node_image_republishers:
-    #     ld.add_action(node_republisher)
-    # ===================== CAMERA SECTION =====================
     ld.add_action(group_spawn_gz)
-    ld.add_action(node_rviz2)
+    # ld.add_action(node_rviz2)
 
     # Generate the launch description  
     return ld

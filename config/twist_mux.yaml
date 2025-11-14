@@ -5,6 +5,7 @@ twist_mux:
         topic   : nav_vel
         timeout : 0.5
         priority: 10
+        # stamped : false
         stamped : true
 
       joystick:
