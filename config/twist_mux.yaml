@@ -12,5 +12,5 @@ twist_mux:
         topic   : joy_vel
         timeout : 0.5
         priority: 100
-        stamped : false
-        # stamped : true
+        # stamped : false
+        stamped : true
