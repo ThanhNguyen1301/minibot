@@ -25,12 +25,12 @@ def generate_launch_description():
 
     declare_map_yaml_file= DeclareLaunchArgument(
         'map_yaml_file',
-        default_value='/home/dev/do_an/src/minibot/maps/home.yaml',
+        default_value='/home/dev/do_an/src/minibot/maps/my_map.yaml',
     )  
 
     declare_params_file= DeclareLaunchArgument(
         'params_file',
-        default_value='/home/dev/do_an/src/minibot/config/md_nav2_params.yaml',
+        default_value='/home/dev/do_an/src/minibot/config/nav2_params.yaml',
     ) 
 
     declare_autostart= DeclareLaunchArgument(
