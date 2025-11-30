@@ -16,28 +16,6 @@ def generate_launch_description():
     params_file = LaunchConfiguration('params_file')
     autostart = LaunchConfiguration('autostart')
 
-
-    declare_use_sim_time= DeclareLaunchArgument(
-        'use_sim_time',
-        default_value='True',
-        description='If true, use simulated clock'
-    )  
-
-    declare_map_yaml_file= DeclareLaunchArgument(
-        'map_yaml_file',
-        default_value='/home/dev/do_an/src/minibot/maps/my_map.yaml',
-    )  
-
-    declare_params_file= DeclareLaunchArgument(
-        'params_file',
-        default_value='/home/dev/do_an/src/minibot/config/nav2_params.yaml',
-    ) 
-
-    declare_autostart= DeclareLaunchArgument(
-        'autostart',
-        default_value='True',
-    ) 
-
     # Declare the path to files
     joy_params_file = os.path.join(
         get_package_share_directory(package_name), 
@@ -50,6 +28,40 @@ def generate_launch_description():
         'config', 
         'nav2_rviz2.rviz' 
     )
+
+    map_file_path = os.path.join(
+        get_package_share_directory(package_name),
+        'maps',
+        'home.yaml'
+    )
+
+    nav2_params_path = os.path.join(
+        get_package_share_directory(package_name),
+        'config',
+        'nav2_params.yaml'
+    )
+
+    # Declare default value
+    declare_use_sim_time= DeclareLaunchArgument(
+        'use_sim_time',
+        default_value='True',
+        description='If true, use simulated clock'
+    )  
+
+    declare_autostart= DeclareLaunchArgument(
+        'autostart',
+        default_value='True',
+    ) 
+
+    declare_map_yaml_file= DeclareLaunchArgument(
+        'map_yaml_file',
+        default_value=map_file_path,
+    )  
+
+    declare_params_file= DeclareLaunchArgument(
+        'params_file',
+        default_value=nav2_params_path,
+    ) 
 
     # joy node
     joy_node = Node(

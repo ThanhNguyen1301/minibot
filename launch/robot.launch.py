@@ -44,12 +44,6 @@ def generate_launch_description():
         'robot.urdf.xacro'
     )
 
-    rviz_config_file_dir = os.path.join(
-        package_dir, 
-        'config', 
-        'minibot_config.rviz'
-    )
-
     robot_controllers_file_dir = os.path.join(
         package_dir, 
         'config', 
@@ -111,6 +105,7 @@ def generate_launch_description():
         ],
     )
 
+    # Twist_mux
     node_twist_mux = Node(
         package="twist_mux",
         executable="twist_mux",
@@ -126,7 +121,7 @@ def generate_launch_description():
              'diff_drive_controller/cmd_vel'),
         ],
     )
-
+    # Twist_stamper
     node_twist_stamper = Node(
         package="twist_stamper",
         executable="twist_stamper",
@@ -188,9 +183,6 @@ def generate_launch_description():
     ld.add_action(node_twist_stamper)
 
     ld.add_action(node_rplidar_drive)
-
-
-
 
     # Generate the launch description  
     return ld

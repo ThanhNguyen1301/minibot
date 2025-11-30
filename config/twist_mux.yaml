@@ -14,3 +14,10 @@ twist_mux:
         priority: 100
         # stamped : false
         stamped : true
+
+      keyboard:
+        topic   : cmd_vel
+        timeout : 0.5
+        priority: 50
+        stamped : false
+        # stamped : true
