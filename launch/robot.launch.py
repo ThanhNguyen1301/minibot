@@ -49,7 +49,6 @@ def generate_launch_description():
         'config', 
         'controller.yaml'
     )
-
     
     twist_mux_params_file = os.path.join(
         package_dir, 
@@ -79,7 +78,6 @@ def generate_launch_description():
         parameters=[params]
         
     )
-
  
     # controller spawn
     node_ros2_control = Node(
@@ -182,7 +180,7 @@ def generate_launch_description():
     ld.add_action(node_twist_mux)
     ld.add_action(node_twist_stamper)
 
-    ld.add_action(node_rplidar_drive)
+    # ld.add_action(node_rplidar_drive)
 
     # Generate the launch description  
     return ld
