@@ -180,7 +180,7 @@ def generate_launch_description():
     ld.add_action(node_twist_mux)
     ld.add_action(node_twist_stamper)
 
-    # ld.add_action(node_rplidar_drive)
+    ld.add_action(node_rplidar_drive)
 
     # Generate the launch description  
     return ld
